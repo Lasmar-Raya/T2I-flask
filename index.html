@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>JS Bin</title>
+    <script>
+      window.addEventListener('load', function() {
+        // Request send function
+        const sendEvent = async function() {
+          const push_result = function(value, isText) {
+            const e = document.querySelector("#result")
+            if (isText === true)
+              e.innerText = value
+            else
+              e.innerHTML = value
+            console.log("ResultPush",value)
+          }
+
+          push_result("Loading...", true)
+          const text = document.querySelector("#inputText").value
+          const base = btoa(text)
+          const response = await fetch(`/render/${base}`)
+          const reader = response.body.getReader()
+          
+          const td = new TextDecoder()
+          let done, value
+          while (!done) {
+            ({value, done} = await reader.read())
+            if (done) {
+              break
+            }
+            push_result(td.decode(value))
+          }
+        }
+        // Register event for Submit press
+        document.querySelector("#sendBtn").addEventListener('click', () => sendEvent())
+        // Register event for input-field "key up"
+        document.querySelector("#inputText").addEventListener('keyup', (evt) => {
+          // Check if it's enter/return
+          if (evt.key === "Enter") {
+            // Send request
+            sendEvent()
+          }
+        })
+      })
+
+    </script>
+    <style>
+      .form {
+        display: inline-block;
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 8px 8px;
+        background: #fff;
+      }
+      #result {
+        display: inline-block;
+        background: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 8px;
+      }
+      .frame {
+        display: inline-block;
+        border: 1px solid #555;
+        border-radius: 8px;
+        padding: 8px 8px;
+        background: #aaa;
+      }
+    </style>
+  </head>
+  <body>
+    <br>
+    <div class="frame">
+      <div id="result"></div>
+      <br>
+      <div class="form">
+        <input name="text" id="inputText">
+        <input type="button" id="sendBtn" value="Submit">
+      </div>
+    </div>
+  </body>
+</html>
